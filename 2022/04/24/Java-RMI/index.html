@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="pm&fc">
+
+
+    <meta name="subtitle" content="Blog">
+
+
+    <meta name="description" content="写点所学所想">
+
+
+
+<title>Java RMI | Retry-later&#39;s Blog</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Retry-later&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Retry-later&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6;    // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function () {
+            tocbot.refresh(obj_merge(tocbot_default_config, { hasInnerContainers: true }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function () {
+        tocbot.init(obj_merge(tocbot_default_config, { collapseDepth: 1 }));
+    });
+
+    function expandToc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, { collapseDepth: expanded ? 1 : DEPTH_MAX }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Java RMI</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">pm&fc</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 24, 2022&nbsp;&nbsp;23:33:46</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/Java/">Java</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="RMI-入门"><a href="#RMI-入门" class="headerlink" title="RMI 入门"></a>RMI 入门</h1><h2 id="Java-RMI定义"><a href="#Java-RMI定义" class="headerlink" title="Java RMI定义"></a>Java RMI定义</h2><p>RMI机制可以获取一个远程主机上JVM虚拟机上对象的引用，之后对这个对象的调用就和调用本地对象一样。</p>
+<p>RMI可以调用远程对象的方法，传递对象作为参数，同时可以从返回之中获取对象。</p>
+<p>RMI使用对象序列化，有时也适用动态类加载和Security manager来安全的传输Java类。</p>
+<h2 id="远程对象与非远程对象"><a href="#远程对象与非远程对象" class="headerlink" title="远程对象与非远程对象"></a>远程对象与非远程对象</h2><p>远程对象的第一个前提必须是可序列化的，RMI中的远程对象可以是不同机器上的对象，也可以是本机上的对象。像普通Java对象一样，远程对象也是引用传递。无论在何处被调用，其真正的运行还是在原始主机上。</p>
+<p>非远程对象：他们只是一个可序列化的对象，当在网络中传递一个非远程对象时，他只是被复制。因此远程对象和非远程对象的区别在于是引用传递还是复制传递。</p>
+<h2 id="Stubs-和Skeletons"><a href="#Stubs-和Skeletons" class="headerlink" title="Stubs 和Skeletons"></a>Stubs 和Skeletons</h2><p>在调用远程对象方法的事，实际是调用本地的一串代码，作为远程对象的代理，称为Stub。Skeleton在远程服务器上，是真正的对象的代理，它从stub接收远程方法调用并将它们传递给对象。Stub和Skeleton对程序员来说是隐藏的。</p>
+<p>远程调用对象Stub和Skeleton通过rmic（RMI Compiler）创建，当编译完成后，在远程对象的类中运行rmic。</p>
+<h2 id="远程接口"><a href="#远程接口" class="headerlink" title="远程接口"></a>远程接口</h2><p>远程对象是实现特殊远程接口的对象，该接口定义了远程调用对象的方法。远程接口必须继承java.rmi.Remote；远程对象的Stub也是根据远程接口自动生成的。需要引用远程对象作为远程接口的一个实例而不是类的实例。因为真正的对象和stub都实现了远程接口，所以对方法调用而言它们是一样的。</p>
+<p>远程对象的public字段无法直接访问，需要通过访问器函数。</p>
+<p>远程接口的方法必须声明为可抛出java.rmi.RemoteException异常，该异常当任何网络错误发生的时候都会被抛出。下面是一个远程接口，描述了远程对象的动作，包含一个可远程调用的方法，返回String。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mysec.T;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.Remote;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Hello</span> <span class="keyword">extends</span> <span class="title class_">Remote</span> &#123;</span><br><span class="line">    String <span class="title function_">sayHello</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="UnicastRemoteObject-类"><a href="#UnicastRemoteObject-类" class="headerlink" title="UnicastRemoteObject 类"></a>UnicastRemoteObject 类</h2><p>远程对象的实现常常继承java.rmi.server.UnicastRemoteObject。构造UnicastRemoteObject子类时，RMI运行时系统自动导出该子类，并开始监听来自该对象远程接口的stub的网络连接。下面是实现了远程接口的远程对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mysec.T;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.UnicastRemoteObject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.LogManager;</span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.Logger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloImpl</span> <span class="keyword">extends</span> <span class="title class_">UnicastRemoteObject</span> <span class="keyword">implements</span>  <span class="title class_">Hello</span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LogManager.getLogger(HelloImpl.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> <span class="title function_">HelloImpl</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">sayHello</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">        log.info(<span class="string">&quot;Hello,This is an example RMI program.&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>  <span class="string">&quot;Hello,This is an example RMI program.&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在继承UnicastRemoteObject类的时候，必须显示的定义一个远程对象的构造方法。即使构造方法什么都不做，因为构造方法可以抛出一个RemoteException。</p>
+<p>当我们不想继承java.rmi.server.UnicastRemoteObject的时候，比如当定义远程对象必须是系统特殊基类的子类时。我们可以调用UnicastRemoteObject的静态方法exportObject（）导出对象。exportObject()方法将远程接口作为参数，帮我们实现了UnicastRemoteObject构造函数实现的功能并将远程对象stub作为值返回。</p>
+<p>默认情况下导出对象会监听一个随机分配的临时端口，而另一种相识的UnicastRemoteObject导出对象，可以显式的控制监听端口号，exportObject（）以远程接口和端口号作为参数。</p>
+<h2 id="RMI-注册表"><a href="#RMI-注册表" class="headerlink" title="RMI 注册表"></a>RMI 注册表</h2><p>RMI注册表用于向客户端提供已注册远程对象引用的查找功能，由Naming类和rmiregistry程序组成，rmiregistry需要在使用它的Java 程序之前启动。之后创建远程对象实例，并将其绑定到注册表的特定名称。（将自身绑定到注册表上的远程对象有时会为此提供一个main方法。），注册表名可以是任意名称。</p>
+<p>客户端寻找服务器上对象时，他会请求一个url，其中包含rmi协议，主机名、请求的对象名。Naming类和RMIregistry协商并返回远程对象的引用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mysec.T;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.net.MalformedURLException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.LogManager;</span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.Logger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloServer</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LogManager.getLogger(HelloServer.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, MalformedURLException &#123;</span><br><span class="line">        <span class="type">Hello</span> <span class="variable">hello</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HelloImpl</span>();</span><br><span class="line">        LocateRegistry.createRegistry(<span class="number">8809</span>);</span><br><span class="line">        java.rmi.Naming.rebind(<span class="string">&quot;rmi://localhost:8809/hello&quot;</span>,hello);</span><br><span class="line">        log.info(<span class="string">&quot;Ready&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="RMI-调用过程"><a href="#RMI-调用过程" class="headerlink" title="RMI 调用过程"></a>RMI 调用过程</h2><ul>
+<li>传输对象必须先实现一个继承自java.io.Serializable接口，并且客户端和服务端的serialVersionUID要一致。</li>
+<li>Server开放两个服务，RMI registry（默认1099端口）、远程对象通讯端口（临时端口，随机）、有时RMI registry和远程对象不在同一个主机。</li>
+</ul>
+<h3 id="远程方法调用过程"><a href="#远程方法调用过程" class="headerlink" title="远程方法调用过程"></a>远程方法调用过程</h3><ol>
+<li>Server监听一个端口（远程对象的通讯端口，随机—）</li>
+<li>获取一个Stub，Stub中包含远程对象的地址和端口等信息</li>
+<li>Client调用stub的方法</li>
+<li>Stub连接到Server端通讯端口，提交参数</li>
+<li>Server端执行具体方法，返回Stub</li>
+<li>Stub将结果返回Client</li>
+</ol>
+<h3 id="获取Stub的过程"><a href="#获取Stub的过程" class="headerlink" title="获取Stub的过程"></a>获取Stub的过程</h3><ol>
+<li>Server的Remote Object向RMI Registry注册远程对象名称。</li>
+<li>Client通过名称向RMI registry查询远程对象</li>
+<li>RMI registry返送stub到Client</li>
+<li>Client调用方法及参数，stub通过Skeleton向远程对象发起调用。</li>
+</ol>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>pm&fc</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="https://retry-later.github.io/2022/04/24/Java-RMI/">https://retry-later.github.io/2022/04/24/Java-RMI/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/Java/"># Java</a>
+                    
+                        <a href="/tags/RMI/"># RMI</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2022/04/24/PicGO---Github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%9B%BE%E5%BA%8A/">PicGO+Github搭建个人图床</a>
+            
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© pm&amp;fc | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="pm&fc">
+
+
+    <meta name="subtitle" content="Blog">
+
+
+    <meta name="description" content="写点所学所想">
+
+
+
+<title>C语言简介 | Retry-later&#39;s Blog</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Retry-later&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Retry-later&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6;    // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function () {
+            tocbot.refresh(obj_merge(tocbot_default_config, { hasInnerContainers: true }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function () {
+        tocbot.init(obj_merge(tocbot_default_config, { collapseDepth: 1 }));
+    });
+
+    function expandToc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, { collapseDepth: expanded ? 1 : DEPTH_MAX }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">C语言简介</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">pm&fc</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 24, 2022&nbsp;&nbsp;23:53:08</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/C%E8%AF%AD%E8%A8%80/">C语言</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="C语言扫盲"><a href="#C语言扫盲" class="headerlink" title="C语言扫盲"></a>C语言扫盲</h1><h2 id="C语言简介"><a href="#C语言简介" class="headerlink" title="C语言简介"></a>C语言简介</h2><ul>
+<li>C语言创始人：丹尼斯·里奇</li>
+<li>C语言特点：<ul>
+<li>高效性</li>
+<li>可移植性</li>
+<li>灵活性</li>
+</ul>
+</li>
+<li>编程语言的分类<ul>
+<li>低级语言<ul>
+<li>机器语言 （01二进制字符串）</li>
+<li>汇编语言</li>
+</ul>
+</li>
+<li>高级语言<ul>
+<li>面向过程<ul>
+<li>C语言</li>
+</ul>
+</li>
+<li>面向对象<ul>
+<li>编译型语言 -&gt; C++ （将源代码编译为机器码供CPU直接执行）</li>
+<li>解释型语言 -&gt; Python（需要一个解释器翻译为计算机能够读懂的语言）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="C语言标准"><a href="#C语言标准" class="headerlink" title="C语言标准"></a>C语言标准</h2><h2 id="一个简单的栗子"><a href="#一个简单的栗子" class="headerlink" title="一个简单的栗子"></a>一个简单的栗子</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span><span class="comment">//包含标准输入输出头文件，比如printf等函数。这句话的意思就是将整个标准输入输出代码导入到了当前程序中。</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span>&#123;<span class="comment">//主函数，一般情况下程序从main函数开始执行，int代表当前函数返回的类型，void代表空也就是代表没有要传给函数的参数。按照新的书写规范，void可以不写。</span></span><br><span class="line">  <span class="type">int</span> num; <span class="comment">//声明一个整数型的变量</span></span><br><span class="line">  num = <span class="number">1</span>;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;i am a simple!&quot;</span>);  <span class="comment">// C语言中语句结尾需要使用;结束。</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;  <span class="comment">//返回一个0，在unix和Linux是有实际意义的。</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    C语言中有两种常用的源文件类型，.h文件（头文件，表示一些声明之类的信息）和.c文件（程序源代码），include代表包含头文件。</p>
+<h2 id="开始尝试编写C程序"><a href="#开始尝试编写C程序" class="headerlink" title="开始尝试编写C程序"></a>开始尝试编写C程序</h2><ul>
+<li>vs2015创建win32 控制台程序，选择空项目（为了避免预编译的头文件对我们造成干扰）。目前我们只会用到两个文件头文件和源文件。C90标准函数前的类型可以不用写，但是目前使用的标准为C99标准是需要写的，需要养成一个良好的习惯。</li>
+<li>上面的例子在解决方案资源管理器下点击项目生成-会产生两个文件，exe和pdb文件（符号文件，帮助调试，包含程序中的变量名称、函数名称）。</li>
+</ul>
+<h2 id="C语言注释"><a href="#C语言注释" class="headerlink" title="C语言注释"></a>C语言注释</h2><ul>
+<li>单行注释 <code>// 这是一个备注</code></li>
+<li>多行注释</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">C语言的错误一般有两种：</span></span><br><span class="line"><span class="comment">1、语法错误（IDA会自动提示）</span></span><br><span class="line"><span class="comment">2、语义错误（需要断点调试）</span></span><br><span class="line"><span class="comment">生成断点的两种方式：</span></span><br><span class="line"><span class="comment">1、在需要调试的哪一行前点击，会出现一个红点</span></span><br><span class="line"><span class="comment">2、光标置于需要调试的行，按F9</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">快捷键F5 如果当前代码已经生成了exe文件则运行程序，如果没有生成exe则先生成再运行。</span></span><br><span class="line"><span class="comment">F10 单步步过 （每次只执行一行代码）</span></span><br><span class="line"><span class="comment">F11 单步步入（遇到函数的时候进入函数实现代码查看函数的实现）</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="vs2015-release和debug的区别"><a href="#vs2015-release和debug的区别" class="headerlink" title="vs2015 release和debug的区别"></a>vs2015 release和debug的区别</h2><ul>
+<li>release 发行版本，相对提及更小运行速度快</li>
+<li>debug 调试版、稍大，优化少附带有调试信息</li>
+</ul>
+<h2 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h2><ol>
+<li>源文件和头文件可以同名</li>
+<li>变量的声明可以放在头文件中声明</li>
+<li>如果在本目录下寻找头文件的话使用””，使用C自带的头文件的话使用&lt;&gt;</li>
+</ol>
+<p>Eg:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span> <span class="comment">//系统头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;main.h&quot;</span> <span class="comment">//自定义头文件</span></span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="作业"><a href="#作业" class="headerlink" title="作业"></a>作业</h2><ol>
+<li><p>了解一下C语言的历史</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/C%E8%AF%AD%E8%A8%80%E7%9A%84%E5%8E%86%E5%8F%B2">https://zh.wikipedia.org/wiki/C%E8%AF%AD%E8%A8%80%E7%9A%84%E5%8E%86%E5%8F%B2</a></li>
+<li>C语言标准的历程<ol>
+<li>C89 1989年被美国国家标准协会标准化</li>
+<li>C90 1990年被国际标准化组织制定的国际化C语言标准，在C89的基础上做了少量修改。</li>
+<li>C99 </li>
+<li>C11 2011年国际标准化组织发布新的C语言标准，提高了对C++的兼容性。</li>
+<li>C18 对C11做了修改补充</li>
+<li>C2X 引入新的特性</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>使用vs2015 编写课上的程序，尝试自己调试、监控、内存、反汇编等功能。</p>
+</li>
+<li><p>了解C语言的保留字</p>
+<ol>
+<li>在C89标准中C语言有32个保留的关键字</li>
+<li>auto、break、case、char、const、continue、default、do、int、long、register、return、short、signed、sizeof、static、struct、switch、typedef、union、unsigned、void、volatile、while、double、else、enum、extern、float、for、goto、if</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">if，else，switch，case，default – 用于决策控制编程结构。</span><br><span class="line">break – 用于任何循环或者switch-case。</span><br><span class="line">int，float，char，double，long – 这些是数据类型，在变量声明期间使用。</span><br><span class="line">for，while – C 中的循环结构类型。</span><br><span class="line">void – 其中一种返回类型。</span><br><span class="line">goto – 用于重定向执行流程。</span><br><span class="line">auto，signed，const，extern，register，unsigned – 定义一个变量。</span><br><span class="line">return – 该关键字用于返回值。</span><br><span class="line">continue – 它通常与for，while和do-while循环一起使用，当编译器遇到此语句时，它执行循环的下一次迭代，跳过当前迭代的其余语句。</span><br><span class="line">enum – 常量集。</span><br><span class="line">sizeof – 用于了解尺寸。</span><br><span class="line">struct， typedef – 结构中使用的这两个关键字（单个记录中的数据类型分组）。</span><br><span class="line">union – 它是一组变量，它们共享相同的内存位置和内存存储。</span><br><span class="line">volatile</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>制定计划</p>
+</li>
+</ol>
+<h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><h2 id="整数类型"><a href="#整数类型" class="headerlink" title="整数类型"></a>整数类型</h2><ul>
+<li><p>声明变量</p>
+<ul>
+<li><code>int num </code></li>
+</ul>
+</li>
+<li><p>批量声明变量</p>
+<ul>
+<li><pre><code class="c">int num1,num2,num3
+</code></pre>
+</li>
+</ul>
+</li>
+<li><p>声明赋值</p>
+<ul>
+<li><code>int num1=1 </code></li>
+<li><code>int num1,num2 = 5 //这里有个问题，就是其实只有num2被复制了</code></li>
+<li><code>int num1=5,num2=5,num3=5</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="scanf函数"><a href="#scanf函数" class="headerlink" title="scanf函数"></a>scanf函数</h2><ul>
+<li>scanf函数输入函数，但是因为该函数容易引起缓冲区溢出之类的问题，所谓微软提供了一个新的函数。scanf(“%d”,&amp;Num) %d数据类型，Num变量名</li>
+<li>scans_s 输入函数 scarf_s(“%d”,&amp;Num,10) 建议使用scanf，因为如果跨平台的话可能会产生错误。</li>
+<li>%d告诉程序接收到的参数是int类型</li>
+<li>&amp;Num4 告诉程序接收到到的数据存储在Num4中</li>
+<li>vs2015中如果使用scanf而不使用scanf_s，会触发一个报错。声称这个函数是不安全的，如果我们强制使用该函数的话则需要在项目名–属性–C&#x2F;C++–预处理器–预处理器定义–编辑– win32前加入 _CRT_SECURE_NO_VARNINGS 即可使用。</li>
+</ul>
+<h2 id="printf函数"><a href="#printf函数" class="headerlink" title="printf函数"></a>printf函数</h2><ul>
+<li>printf(“%d”,Num5)</li>
+</ul>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>pm&fc</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="https://retry-later.github.io/2022/04/24/C%E8%AF%AD%E8%A8%80%E7%AE%80%E4%BB%8B/">https://retry-later.github.io/2022/04/24/C%E8%AF%AD%E8%A8%80%E7%AE%80%E4%BB%8B/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/C%E8%AF%AD%E8%A8%80/"># C语言</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2022/04/24/C%E8%AF%AD%E8%A8%80-%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">C语言-数据类型</a>
+            
+            
+            <a class="next" rel="next" href="/2022/04/24/Vs2015-%E7%BC%96%E8%AF%91-Lua5-4-3/">Vs2015 编译 Lua5.4.3</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© pm&amp;fc | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
