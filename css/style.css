@@ -774,7 +774,7 @@ header label {
   color: #eee;
 }
 .post-content h2::before {
-  content: "[";
+  content: "| ";
   margin-right: 5px;
   color: #2d96bd;
 }
@@ -782,7 +782,7 @@ header label {
   color: #eee;
 }
 .post-content h2::after {
-  content: "]";
+  content: " |";
   margin-right: 5px;
   color: #2d96bd;
 }
@@ -790,7 +790,7 @@ header label {
   color: #eee;
 }
 .post-content h3::before {
-  content: "-* ";
+  content: "{ ";
   margin-right: 5px;
   color: #2d96bd;
 }
@@ -798,7 +798,7 @@ header label {
   color: #eee;
 }
 .post-content h3::after {
-  content: " *-";
+  content: " }";
   margin-right: 5px;
   color: #2d96bd;
 }
