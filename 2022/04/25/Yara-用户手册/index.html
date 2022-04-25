@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="pm&fc">
+
+
+    <meta name="subtitle" content="Blog">
+
+
+    <meta name="description" content="写点所学所想">
+
+
+
+<title>Yara 用户手册 | Retry-later&#39;s Blog</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Retry-later&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Retry-later&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6;    // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function () {
+            tocbot.refresh(obj_merge(tocbot_default_config, { hasInnerContainers: true }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function () {
+        tocbot.init(obj_merge(tocbot_default_config, { collapseDepth: 1 }));
+    });
+
+    function expandToc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, { collapseDepth: expanded ? 1 : DEPTH_MAX }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Yara 用户手册</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">pm&fc</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 25, 2022&nbsp;&nbsp;14:47:49</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Yara介绍"><a href="#Yara介绍" class="headerlink" title="Yara介绍"></a>Yara介绍</h1><p>&amp;nbsp;&amp;nbsp; Yara是一个旨在帮助安全研究人员识别和分类恶意软件的工具，基于Yara安全研究人员可以通过文本或者二进制的方式对恶意软件家族创建描述。如下面的例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">rule silent_banker : banker</span><br><span class="line">&#123;</span><br><span class="line">    meta:</span><br><span class="line">        description = <span class="string">&quot;This is just an example&quot;</span></span><br><span class="line">        thread_level = <span class="number">3</span></span><br><span class="line">        in_the_wild = <span class="literal">true</span></span><br><span class="line">    strings:</span><br><span class="line">        $a = &#123;<span class="number">6</span>A <span class="number">40</span> <span class="number">68</span> <span class="number">00</span> <span class="number">30</span> <span class="number">00</span> <span class="number">00</span> <span class="number">6</span>A <span class="number">14</span> <span class="number">8</span>D <span class="number">91</span>&#125;</span><br><span class="line">        $b = &#123;<span class="number">8</span>D <span class="number">4</span>D B0 <span class="number">2B</span> C1 <span class="number">83</span> C0 <span class="number">27</span> <span class="number">99</span> <span class="number">6</span>A <span class="number">4</span>E <span class="number">59</span> F7 F9&#125;</span><br><span class="line">        $c = <span class="string">&quot;UVODFRYSIHLNWPEJXQZAKCBGMT&quot;</span></span><br><span class="line">    condition:</span><br><span class="line">        $a or $b or $c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>&amp;nbsp;&amp;nbsp;上面的示例告诉yara，任何包含$a、$b、$c三个字符串其中之一的文件都必须要报告silent_banker。当然这只是一个简单的示例，通过使用通配符、不区分大小写的字符串、正则表达式、特殊操作符和其他特性，可以创造更多更为复杂、更为强大的规则。</p>
+<h1 id="入门"><a href="#入门" class="headerlink" title="入门"></a>入门</h1><p>&amp;nbsp;&amp;nbsp;Yara是一个可以在Windows、Linux和Mac os上运行的跨平台工具。可以在<a target="_blank" rel="noopener" href="https://github.com/VirusTotal/yara/releases">GitHub上获取最新版本</a>。</p>
+<h2 id="编译安装Yara"><a href="#编译安装Yara" class="headerlink" title="编译安装Yara"></a>编译安装Yara</h2><p>&amp;nbsp;&amp;nbsp; 我们可以通过在GitHub上下载源码进行编译安装来获得最新版的Yara。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tar -zxf yara<span class="number">-4.1</span><span class="number">.0</span>.tar.gz</span><br><span class="line">cd yara<span class="number">-4.1</span><span class="number">.0</span></span><br><span class="line">./bootstrap.sh</span><br></pre></td></tr></table></figure>
+<p>&amp;nbsp;&amp;nbsp;当然编译安装的前提条件是保证你的Ubuntu或者Debian上拥有automake、libtool、make和gcc以及pkg-config。你可以使用以下命令去安装这些依赖：<br><code> sudo apt-get install automake libtool make gcc pkg-config</code><br>&amp;nbsp;&amp;nbsp;如果你打算修改Yara的源代码那么你可能还需要安装flex和bison。<br><code> sudo apt-get install flex bison</code><br>&amp;nbsp;&amp;nbsp;一切准备就绪之后我们就可以来编译安装Yara了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./bootstrap.sh</span><br><span class="line">./configure</span><br><span class="line">make </span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<p>&amp;nbsp;&amp;nbsp;安装结束之后运行检查程序来查看我们的安装是否正确。<br><code>make check</code><br>&amp;nbsp;&amp;nbsp;一些Yara的特征依赖Openssl库运行，当检测到你的电脑存在Openssl依赖库的时候，这些特征会自动启用。当然如果你的电脑没有安装Openssl依赖库Yara也会正常运行，但是某些特征将会无法使用。如果希望强制启用Openssl依赖的特征，在运行.&#x2F;configure是需要使用–with-crypto参数，同时Ubuntu或者Debian用户需要运行以下命令安装Openssl依赖。<br><code> sudo apt-get install libssl-dev</code><br>&amp;nbsp;&amp;nbsp;编译过程中以下模块默认不会安装：</p>
+<ul>
+<li>cuckoo</li>
+<li>magic</li>
+<li>dotnet</li>
+</ul>
+<p>&amp;nbsp;&amp;nbsp;如果你计划使用其中的某个模块，在编译的过程中需要向configure脚本传递–enable-<module-name>选项。比如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./configure --enable-cuckoo</span><br><span class="line">./configure --enable-magic</span><br><span class="line">./configure --enable-dotnet</span><br><span class="line">./configure --enable-cukoo --enable-mgic --enable-dotnet</span><br></pre></td></tr></table></figure>
+<p>&amp;nbsp;&amp;nbsp;模块通常依赖外部库运行，根据你选择启用的模块不同你可能需要安装以下库文件</p>
+<ul>
+<li>cuckoo<br>&amp;nbsp;&amp;nbsp;依赖Jansson来解析JSON，通常Ubuntu和Debian已经安装了libjansson-dev依赖库，如果你的系统没有安装这个库的话可以使用下面的命令在软件仓库中安装它：<br><code>sudo apt-get install libjansson-dev</code></li>
+<li>magic<br>&amp;nbsp;&amp;nbsp;依赖libmagic库来处理Unix标准库文件，Ubuntu、Debian和Centos中该库的名称为libmagic-dev。你可以在<a href="ftp://ftp.astron.com/pub/file/">这里获取它的源码</a></li>
+</ul>
+<h2 id="使用vcpkg安装Yara"><a href="#使用vcpkg安装Yara" class="headerlink" title="使用vcpkg安装Yara"></a>使用vcpkg安装Yara</h2><p>​    你还可以使用vcpkg包管理器来安装Yara：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/microsoft/vcpkg.git</span><br><span class="line"><span class="built_in">cd</span> vcpkg</span><br><span class="line">./bootstrap-vcpkg.sh</span><br><span class="line">./vcpkg integrate install</span><br><span class="line">vcpkg install yara</span><br></pre></td></tr></table></figure>
+
+<p>​    vcpkg中的Yara是由微软团队成员和社区贡献者所维护的，如果vcpkg仓库中的版本过老的话你需要创建一个问题或者拉取请求。</p>
+<h2 id="在Windows上安装Yara"><a href="#在Windows上安装Yara" class="headerlink" title="在Windows上安装Yara"></a>在Windows上安装Yara</h2><p>​    你可以在下面的链接中找到Windows版本的二进制程序，同时提供了64位和32位两种版本的下载，你可以选择适合你的版本进行下载。只需将其解压到你的硬盘上就可以了。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/VirusTotal/yara/releases/latest">Windows版本下载链接</a></p>
+<p>​    当然你也可以使用scoop或者chocolatey这种简单的方式进行安装，但是这两种方式安装的Yara版本不是由专业团队也不是由Yara作者所维护。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scoop install yara</span><br><span class="line">choco install yara</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用Homebrew在Mac-OS上安装Yara"><a href="#使用Homebrew在Mac-OS上安装Yara" class="headerlink" title="使用Homebrew在Mac OS上安装Yara"></a>使用Homebrew在Mac OS上安装Yara</h2><p>​    使用Homebrew就可以轻松的在Mac上安装Yara，命令为：</p>
+<p><code>brew install yara</code></p>
+<h2 id="安装yara-python"><a href="#安装yara-python" class="headerlink" title="安装yara-python"></a>安装yara-python</h2><p>​    如果你想在你的python脚本中调用Yara的话你需要安装yara-python扩展，请阅读VirusTotal发布的<a target="_blank" rel="noopener" href="https://github.com/VirusTotal/yara-python">教程</a>来了解如何安装yara-python扩展。</p>
+<p><u><em><strong>注意Ubuntu20.04 apt安装的yara是3.9版本，最新版本用户手册中的部分功能不能够使用。如果想体验新版的功能需要手动的编译安装。</strong></em></u></p>
+<h3 id="踩坑记录："><a href="#踩坑记录：" class="headerlink" title="踩坑记录："></a>踩坑记录：</h3><p>Ubuntu20.04 TLS编译完成之后会提示</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yara: error <span class="keyword">while</span> loading shared libraries: libyara.so.8: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
+
+<p>​	这是因为在普通用户的环境变量中没有libyara.so.8库的加载路径，所以需要手动设置一下环境变量。</p>
+<p><code>echo &quot;export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH&quot; &gt;&gt; ~/.bashrc &amp;&amp; source ~/.bashrc</code></p>
+<h1 id="运行Yara"><a href="#运行Yara" class="headerlink" title="运行Yara"></a>运行Yara</h1><p>​    现在你已经安装好了Yara，可以尝试编写一个非常简单的规则并使用命令行工具来扫描某些文件了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> rule dummy &#123; condition: <span class="literal">true</span> &#125; &gt; my_first_rule</span><br><span class="line">yara my_first_rule my_first_rule</span><br></pre></td></tr></table></figure>
+
+<p>​    在上面的例子中不要将两个my_first_fule混淆，这里只是使用my_first-rule最为一个被扫描的文件。命令行运行格式为 <code>yara rule_file_name target_dir/target_file_name  </code>。</p>
+<p>​    如果一切正常的话你会得到下面的输出</p>
+<p><code>dummy my_first_rule</code></p>
+<p>​    表示my_first_fule 文件和dummy规则匹配。</p>
+<p>​	如果你得到了一个类似于这样的错误信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yara: error <span class="keyword">while</span> loading shared libraries: libyara.so.2: cannot open shared</span><br><span class="line">object file: No such file or directory</span><br></pre></td></tr></table></figure>
+
+<p>​	这说明yara在&#x2F;var&#x2F;local&#x2F;lib路径下没有找到libyara库，在一些Linux版本中默认不会到&#x2F;usr&#x2F;local&#x2F;lib下去加载库文件，如果我们要解决这个问题就需要手动将这个路径添加到&#x2F;etc&#x2F;ld.so.conf的配置文件中去。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo sh -c <span class="built_in">echo</span> <span class="string">&#x27;echo &quot;/usr/local/lib&quot;&#x27;</span> &gt;&gt; /etc/ld.so.conf</span><br><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure>
+
+<p>​    如果你使用Windows powershell作为你的命令行终端运行yara my_first_rule my_first_rule 可能会出现以下的报错：</p>
+<p><code>my_first_rule(1): error: non-ascii character</code></p>
+<p>​    你可以在创建文件的时候使用Set-Content 选项指定ascii码输出来避免这种情况。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Set-Content -path .\my_first_rule -Value <span class="string">&quot;rule dummy &#123; condition: true &#125;&quot;</span> -Encoding Ascii</span><br><span class="line">.\yara my_first_rule my_first_rule</span><br></pre></td></tr></table></figure>
+
+<h1 id="编写Yara规则"><a href="#编写Yara规则" class="headerlink" title="编写Yara规则"></a>编写Yara规则</h1><h2 id="规则主体"><a href="#规则主体" class="headerlink" title="规则主体"></a>规则主体</h2><p>​	Yara的规则十分容易编写和理解，同时它的语法类似C语言的风格。这里有一个简单的规则你可以尝试去编写它，当然它什么也不能检测。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rule dummy</span><br><span class="line">&#123;</span><br><span class="line">    condition:</span><br><span class="line">    	<span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	每条Yara规则都要由关键字 rule 开头，后面跟着一一个规则标识符。标识符必须遵循和C语言一样的变量命名规范，可以包含字母、数字、下划线，但是第一个字符不能是数字。规则标识符区分大小写，长度不能超过128个字符，同时以下的关键字为保留字符，不能作为标识符来使用。</p>
+<table>
+<thead>
+<tr>
+<th>all</th>
+<th>and</th>
+<th>any</th>
+<th>ascii</th>
+<th>at</th>
+<th>base64</th>
+<th>base64wide</th>
+<th>condition</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>contains</td>
+<td>endswith</td>
+<td>entrypoint</td>
+<td>false</td>
+<td>filesize</td>
+<td>for</td>
+<td>fullword</td>
+<td>global</td>
+</tr>
+<tr>
+<td>import</td>
+<td>icontains</td>
+<td>iendswith</td>
+<td>in</td>
+<td>include</td>
+<td>int16</td>
+<td>int16be</td>
+<td>int32</td>
+</tr>
+<tr>
+<td>int32be</td>
+<td>int8</td>
+<td>int8be</td>
+<td>istartswith</td>
+<td>matches</td>
+<td>meta</td>
+<td>nocase</td>
+<td>not</td>
+</tr>
+<tr>
+<td>of</td>
+<td>or</td>
+<td>private</td>
+<td>rule</td>
+<td>startswith</td>
+<td>strings</td>
+<td>them</td>
+<td>true</td>
+</tr>
+<tr>
+<td>uint16</td>
+<td>uint16be</td>
+<td>uint32</td>
+<td>uint32be</td>
+<td>uint8</td>
+<td>uint8be</td>
+<td>wide</td>
+<td>xor</td>
+</tr>
+</tbody></table>
+<p>​    规则通常由两部分组成，字符串特征和条件。如果规则不依赖任何字符串进行检测的话可以省略字符串部分，但是条件部分通常是必须存在的。在添加恶意程序字符串特征的时候需要给字符串添加一个变量名，这个变量名类似于PHP的变量名，使用＄开头后面跟字母、数字和下划线。变量名的作用是方便我们在条件部分对字符串进行引用，字符串可以定义为十六进制或者文本形式。下面是一个简单的例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">rule ExampleRule</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$my_text_string = <span class="string">&quot;text here&quot;</span></span><br><span class="line">		$my_hex_string = &#123; E2 <span class="number">34</span> A1 C8 <span class="number">23</span> F8 &#125;</span><br><span class="line">	condition:</span><br><span class="line">		$my_text_sting or $my_hex_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	文本字符串使用双引号包含类似于C语言的格式，十六进制字符串使用花括号包含由一系列连续的十六进制数字或者使用空格分隔开的十六进制。注意在十六进制字符串中不允许出现十进制的数字！</p>
+<p>​	条件部分是一条规则逻辑处理的部分，这一部分包含一个布尔表达式，告诉Yara当进程或者文件在条件下符合规则。通常条件部分引用事先定义的字符串变量名作为条件的一部分，如果在进程或者文件中匹配到了字符串则为true否则为false。</p>
+<h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><p>​	你可以像写C语言一样为规则编写注释， Yara能够识别C风格的多行注释和单行注释。如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	this is a multi-line comment .....</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">rule CommentExample <span class="comment">//.. and this is single-line comment</span></span><br><span class="line">&#123;</span><br><span class="line">	condition:</span><br><span class="line">		<span class="literal">false</span> <span class="comment">//just a dummy rule, don&#x27;t do this</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><p>​	Yara能够识别三种类型的字符串，分别为十六进制字符串、文本字符串和正则表达式。十六进制字符串通常是用来匹配原始字节序列的，而文本或者正则通常用来匹配易读的文本部分。但是文本字符串和正则表达式也可以通过转义来匹配原始字节。</p>
+<h3 id="十六进制字符串"><a href="#十六进制字符串" class="headerlink" title="十六进制字符串"></a>十六进制字符串</h3><p>​		十六进制字符串支持三种特殊结构，通配符、跳转和替代。通配符只可以放入字符串的占位符中表示该字符串中某些字节是未知的。它们应该匹配任何内容。占位符使用?来表示，下面是一个使用通配符表示十六进制字符串的示例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule  WidcatExample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$hex_string = &#123; E2 <span class="number">34</span> ?? C8 A? FB &#125;</span><br><span class="line">	condition:</span><br><span class="line">		$hex_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	通配符在定义内容可变化字符串的时候非常有用，但是并不是所有情况中你都知道可变字符串的长度，当你不确定可变字符字节长度的时候十六进制模式还提供了一种方法来表示可变的长度，jump（我们姑且称之为跳转）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule  JumpExample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$hex_string = &#123; F4 <span class="number">23</span> [<span class="number">4</span><span class="number">-6</span>] <span class="number">62</span> B4 &#125;</span><br><span class="line">	condition:</span><br><span class="line">		$hex_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	在上面这个例子中我们设置了一个4-6个字节的可变长度范围，以下任何一个字符串都会匹配到这个规则</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">F4 <span class="number">23</span> <span class="number">01</span> <span class="number">02</span> <span class="number">03</span> <span class="number">04</span> <span class="number">62</span> B4</span><br><span class="line">F4 <span class="number">23</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">62</span> B4</span><br><span class="line">F4 <span class="number">23</span> <span class="number">15</span> <span class="number">82</span> A3 <span class="number">04</span> <span class="number">45</span> <span class="number">22</span> <span class="number">62</span> B4</span><br></pre></td></tr></table></figure>
+
+<p>​	注意：任何跳转的写法比如[X-Y] 必须满足的条件为 0 &lt;&#x3D; X &lt;&#x3D; Y 。在早些Yara版本中，X和Y的值必须小于256，但是在Yara2.0版本以后就没有了这个限制。以下是一些有效的跳转示例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FE <span class="number">39</span> <span class="number">45</span> [<span class="number">0</span><span class="number">-8</span>] <span class="number">89</span> <span class="number">00</span></span><br><span class="line">FE <span class="number">39</span> <span class="number">45</span> [<span class="number">23</span><span class="number">-45</span>] <span class="number">89</span> <span class="number">00</span></span><br><span class="line">FE <span class="number">39</span> <span class="number">45</span> [<span class="number">1000</span><span class="number">-2000</span>] <span class="number">89</span> <span class="number">00</span></span><br></pre></td></tr></table></figure>
+
+<p>​	无效的跳转示例如下：</p>
+<p><code> FE 39 45 [10-7] 89 00</code></p>
+<p>​	如果未知字节的长度是已知的可以使用一个数字来表示：</p>
+<p><code> FE 39 45 [6] 89 00</code></p>
+<p>​	上面的示例就表示有一个6个字节的未知字符串，当然使用下面这两种表达方式也是一样的效果</p>
+<p><code>FE 39 45 [6-6] 89 00</code></p>
+<p><code>FE 39 45 ?? ?? ?? ?? ?? ?? 89 00</code></p>
+<p>​	从Yara2.0版本开始支持无限跳转的表示方法（匹配无限长字符串），示例如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FE <span class="number">39</span> <span class="number">45</span> [<span class="number">10</span>-] <span class="number">89</span> <span class="number">00</span></span><br><span class="line">FE <span class="number">39</span> <span class="number">45</span> [-] <span class="number">89</span> <span class="number">00</span></span><br></pre></td></tr></table></figure>
+
+<p>​	上面这两个示例分别表示未知字节长度最短为10个字节，最长不限；和最短为0 最长不限。			</p>
+<p>​	当一个特征中有已知的多种可能的时候，我们可以采用类似于正则表达式的方式进行书写特征。如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule AlternativesExplel</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$hex_string = &#123; F4 <span class="number">23</span> ( <span class="number">62</span> B4 | <span class="number">56</span> ) <span class="number">45</span> &#125;</span><br><span class="line">	condition:</span><br><span class="line">		$hex_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	上面的例子中表示我们要匹配的特征值有两种可能，一种是<code>F4 23 62 B4 45</code> 另一种情况是<code>F4 23 56 45</code>。</p>
+<p>​	当然，Yara对可选序列的数量没有限制，同时对长度也没有限制。甚至我们可以将可变长度通配符放到可选序列中供我们的程序进行识别，我们可以书写类似于下面的这种规则。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule AlternativesExample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$hex_string = &#123; F4 <span class="number">23</span> ( <span class="number">62</span> B4 | <span class="number">56</span> | <span class="number">45</span> ?? <span class="number">67</span> ) <span class="number">45</span> &#125;</span><br><span class="line">	condition:</span><br><span class="line">		$hex_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="文本字符串"><a href="#文本字符串" class="headerlink" title="文本字符串"></a>文本字符串</h2><p>​	</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule TextExample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$text_string = <span class="string">&quot;footbar&quot;</span></span><br><span class="line">	condition:</span><br><span class="line">		$text_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	这是一个最简单的例子，匹配了ascii 字符和大小写。yara还支持通过修饰符对string进行修饰，通常修饰符跟在string字符串后面使用空格隔开，我们在以后的例子中可以看到。</p>
+<p>​	文本字符串类型还支持C语言格式的转译字符，</p>
+<table>
+<thead>
+<tr>
+<th><code>\&quot;</code></th>
+<th align="right">Double quote</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>\\</code></td>
+<td align="right">Backslash</td>
+</tr>
+<tr>
+<td><code>\r</code></td>
+<td align="right">Carriage return</td>
+</tr>
+<tr>
+<td><code>\t</code></td>
+<td align="right">Horizontal tab</td>
+</tr>
+<tr>
+<td><code>\n</code></td>
+<td align="right">New line</td>
+</tr>
+<tr>
+<td><code>\xdd</code></td>
+<td align="right">Any byte in hexadecimal notation</td>
+</tr>
+</tbody></table>
+<h3 id="修饰符描述"><a href="#修饰符描述" class="headerlink" title="修饰符描述"></a>修饰符描述</h3><p>​	nocase：Case-insensitive strings（不区分大小写）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule CaseInsensitiveTextExample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$text_string = <span class="string">&quot;foobar&quot;</span> nocase</span><br><span class="line">  condition:</span><br><span class="line">  	$text_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	Yara默认对字符串的大小写是敏感的，经过nocase关键词的修饰，不管foobar以什么形式出现，比如 FOOBAR、foobar、FooBar都会匹配到特征。</p>
+<p>Wide: wide-charset-string（宽字符串）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">rule WideCharTextExamples</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">string</span>:</span><br><span class="line">		$wide_and_ascii_string = <span class="string">&quot;Borland&quot;</span> wide ascii</span><br><span class="line">		</span><br><span class="line">	condition:</span><br><span class="line">		$wide_and_ascii_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	ascii修饰符也可以单独出现进行修饰，如果没有wide修饰符出现的话就没有必要单独写ascii修饰符。因为没有wide修饰的字符串默认都是按照ascii字符串进行处理。</p>
+<p>XOR：异或字符串</p>
+<p>​	使用该修饰符用于对字符串本身及单字节异或结果进行匹配，比如下面的事例就是表示对“This program connot”进行匹配。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule Xorexample1</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$xor_string = <span class="string">&quot;This program connot&quot;</span> xor</span><br><span class="line">	condition:</span><br><span class="line">		$xor_sting</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>等同于：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">rule Xorexample2</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$xor_string_1 = <span class="string">&quot;This program connot&quot;</span></span><br><span class="line">		$xor_string_2 = <span class="string">&quot;Uihr!qsnfs`l!b`oonu&quot;</span>  <span class="comment">//明文字符串 xor 1的结果</span></span><br><span class="line">		$xor_string_3 = <span class="string">&quot;Vjkq\&quot;rpmepco\&quot;acllmv&quot;</span> <span class="comment">//注意，其中存在转义字符</span></span><br><span class="line">		...... (所有单字节xor的值)</span><br><span class="line">	condition:</span><br><span class="line">        any of them</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	指定异或范围(从3.11版本开始支持)：比如我们指定规则只匹配 明文字符串异或1和2的值其他值忽略：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule Xorexample3</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$xor_string = <span class="string">&quot;This program connot&quot;</span> xor(<span class="number">0x01</span><span class="number">-0x02</span>)</span><br><span class="line">	condition:</span><br><span class="line">		$xor_string</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>等同于：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">rule Xorexample2</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$xor_string_1 = <span class="string">&quot;This program connot&quot;</span></span><br><span class="line">		$xor_string_2 = <span class="string">&quot;Uihr!qsnfs`l!b`oonu&quot;</span>  <span class="comment">//明文字符串 xor 1的结果</span></span><br><span class="line">		$xor_string_3 = <span class="string">&quot;Vjkq\&quot;rpmepco\&quot;acllmv&quot;</span> <span class="comment">//注意，其中存在转义字符</span></span><br><span class="line">	condition:</span><br><span class="line">		any of them</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>xor修饰符还有一些其他的高级用法，因为本人太菜了没看明白，所以大手子们自行研究yara官方文档吧 ：）</p>
+<p>Base64字符串：</p>
+<p>​	既然连异或运算都支持了怎么可能少了base64呢，yara支持对明文字符的base64编码的检测，这个过程是自动的。也就是你在要检测的明文字符串后面加上base64之后这条规则就既能够检测带有明文特征的文件也能检测base64编码之后的特征。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule base64Example</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$a = <span class="string">&quot;This program connot&quot;</span> base64</span><br><span class="line">	condition:</span><br><span class="line">		$a</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同时base64支持自定义字母表，但是字母表的长度必须满64位</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule base64Example</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$a = <span class="string">&quot;This program connot&quot;</span> base64(<span class="string">&quot;!@#$%^&amp;*()&#123;&#125;[].,|ABCDEFGHIJ\x09LMNOPQRSTUVWXYZabcdefghijklmnopqrstu&quot;</span>)</span><br><span class="line">	condition:</span><br><span class="line">		$a</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Fullword：搜索完整字符串：	</p>
+<p>​	完整字符串的意思就是要匹配的这个字符串前后没有其他的字母或数字的时候才算符合条件，比如</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule fullwordExample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$a = <span class="string">&quot;admin&quot;</span> fullword</span><br><span class="line">	condition:</span><br><span class="line">		$a</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	只会匹配admin www:admin:777 不回匹配 admin1 administrator。</p>
+<p>正则表达式：</p>
+<p>​	正则表达式是yara最强大的功能之一，其定义方式和文本字符串定义相同，只是双引号替换成了斜杠。比如</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">rule Regexample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$re1 = /md5:[<span class="number">0</span><span class="number">-9</span>a-fa-F]&#123;<span class="number">32</span>&#125;/</span><br><span class="line">		$re2 = /state: (on|off)/</span><br><span class="line">		</span><br><span class="line">	condition:</span><br><span class="line">		$re1 and $re2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	正则表达式后面还可以接nocase,asscii,wide等修饰符。2.0之前的版本如果要使用正则表达式需要引用外部的库来实现，但是从2.0之后yara采用了自己的正则表达式引擎。</p>
+<p>yara能够识别的元字符：</p>
+<table>
+<thead>
+<tr>
+<th><code>\</code></th>
+<th>Quote the next metacharacter</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>^</code></td>
+<td>Match the beginning of the file</td>
+</tr>
+<tr>
+<td><code>$</code></td>
+<td>Match the end of the file</td>
+</tr>
+<tr>
+<td>&#96;</td>
+<td>&#96;</td>
+</tr>
+<tr>
+<td><code>()</code></td>
+<td>Grouping</td>
+</tr>
+<tr>
+<td><code>[]</code></td>
+<td>Bracketed character class</td>
+</tr>
+</tbody></table>
+<p>同时也支持量词的表达方式：</p>
+<table>
+<thead>
+<tr>
+<th><code>*</code></th>
+<th>匹配 0 次或多次</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+</code></td>
+<td>匹配 1 次或多次</td>
+</tr>
+<tr>
+<td><code>?</code></td>
+<td>匹配 0 或 1 次</td>
+</tr>
+<tr>
+<td><code>&#123;n&#125;</code></td>
+<td>完全匹配 n 次</td>
+</tr>
+<tr>
+<td><code>&#123;n,&#125;</code></td>
+<td>至少匹配 n 次</td>
+</tr>
+<tr>
+<td><code>&#123;,m&#125;</code></td>
+<td>最多匹配 m 次</td>
+</tr>
+<tr>
+<td><code>&#123;n,m&#125;</code></td>
+<td>匹配 n 到 m 次</td>
+</tr>
+</tbody></table>
+<p>所有的量词都支持非贪婪模式，就是在量词后面加上?</p>
+<table>
+<thead>
+<tr>
+<th><code>*?</code></th>
+<th>匹配 0 次或多次，非贪婪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+?</code></td>
+<td>匹配 1 次或多次，非贪婪</td>
+</tr>
+<tr>
+<td><code>??</code></td>
+<td>匹配 0 次或 1 次，非贪婪</td>
+</tr>
+<tr>
+<td><code>&#123;n&#125;?</code></td>
+<td>精确匹配 n 次，非贪婪</td>
+</tr>
+<tr>
+<td><code>&#123;n,&#125;?</code></td>
+<td>匹配至少 n 次，非贪婪</td>
+</tr>
+<tr>
+<td><code>&#123;,m&#125;?</code></td>
+<td>最多匹配 m 次，非贪婪</td>
+</tr>
+<tr>
+<td><code>&#123;n,m&#125;?</code></td>
+<td>匹配 n 到 m 次，非贪婪</td>
+</tr>
+</tbody></table>
+<p>yara能够识别的转移字符</p>
+<table>
+<thead>
+<tr>
+<th>\t</th>
+<th>tab</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>\n</td>
+<td>换行符</td>
+</tr>
+<tr>
+<td>\r</td>
+<td>回车符</td>
+</tr>
+<tr>
+<td>\f</td>
+<td>换页符</td>
+</tr>
+<tr>
+<td>\a</td>
+<td>提示音</td>
+</tr>
+<tr>
+<td>\xNM</td>
+<td>匹配给定的十六进制字符</td>
+</tr>
+</tbody></table>
+<p>下面的字符类yara也是支持的</p>
+<table>
+<thead>
+<tr>
+<th>\w</th>
+<th>匹配一个字符（字母、数字和下划线）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>\W</td>
+<td>匹配非字母、数字、下划线。等价于 [^A-Za-z0-9]</td>
+</tr>
+<tr>
+<td>\s</td>
+<td>匹配空白字符</td>
+</tr>
+<tr>
+<td>\S</td>
+<td>匹配非空白字符</td>
+</tr>
+<tr>
+<td>\d</td>
+<td>匹配一个十进制字符</td>
+</tr>
+<tr>
+<td>\D</td>
+<td>匹配一个非数字字符</td>
+</tr>
+</tbody></table>
+<p>从3.0版本开始也支持下面的元字符</p>
+<table>
+<thead>
+<tr>
+<th>\b</th>
+<th>匹配一个单词的边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>\D</td>
+<td>除单词边界外的一个匹配</td>
+</tr>
+</tbody></table>
+<p>Private:私有字符串</p>
+<p>​	<code>pass</code> </p>
+<h2 id="conditions"><a href="#conditions" class="headerlink" title="conditions"></a>conditions</h2><p>​	yara的条件部分只不过是其他语言的布尔表达式，同时运算符和运算符的优先级也和其他语言大致相似。支持逻辑关系运算、算数运算、按位运算。但是要注意的是在yara中整数的长度是64位，想uint8、uint16、uint32等函数的结果也可以提升到64位。特别是在按位运算中，~0x01并不是0xFE 而是0xFFFFFFFFFFFFFFFE。一下为运算符的优先级：</p>
+<table>
+<thead>
+<tr>
+<th>Precedence</th>
+<th>Operator</th>
+<th>Description</th>
+<th>Associativity</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>[].</td>
+<td>Array subscriptingStructure member access</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>2</td>
+<td>-~</td>
+<td>Unary minusBitwise not</td>
+<td>Right-to-left</td>
+</tr>
+<tr>
+<td>3</td>
+<td>*%</td>
+<td>MultiplicationDivisionRemainder</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>4</td>
+<td>+-</td>
+<td>AdditionSubtraction</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>5</td>
+<td>&lt;&lt;&gt;&gt;</td>
+<td>Bitwise left shiftBitwise right shift</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>6</td>
+<td>&amp;</td>
+<td>Bitwise AND</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>7</td>
+<td>^</td>
+<td>Bitwise XOR</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>8</td>
+<td>|</td>
+<td>Bitwise OR</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>9</td>
+<td>&lt;&lt;&#x3D;&gt;&gt;&#x3D;</td>
+<td>Less thanLess than or equal toGreater thanGreater than or equal to</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>10</td>
+<td>&#x3D;&#x3D; !&#x3D; contains icontains startswith istartswith endswith iendswith matches</td>
+<td>Equal toNot equal toString contains substringLike contains but case-insensitiveString starts with substringLike startswith but case-insensitiveString ends with substringLike endswith but case-insensitiveString matches regular expression</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>11</td>
+<td>not</td>
+<td>Logical NOT</td>
+<td>Right-to-left</td>
+</tr>
+<tr>
+<td>12</td>
+<td>and</td>
+<td>Logical AND</td>
+<td>Left-to-right</td>
+</tr>
+<tr>
+<td>13</td>
+<td>or</td>
+<td>Logical OR</td>
+<td>Left-to-right</td>
+</tr>
+</tbody></table>
+<p>字符串变量也可以在表达式中使用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">rule example</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$a = <span class="string">&quot;text1&quot;</span></span><br><span class="line">		$b = <span class="string">&quot;text2&quot;</span></span><br><span class="line">		$c = <span class="string">&quot;text3&quot;</span></span><br><span class="line">		$d = <span class="string">&quot;text4&quot;</span></span><br><span class="line">	condition:</span><br><span class="line">		($a or $b) and ($c or $d)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>统计字符串：</p>
+<p>​	有时候我们不仅需要检测某个关键字在文件中是否存在，还需要知道该关键字出现了多少次。这就需要我们对字符串出现的次数进行统计。规则中的条件部分当字符串变量的$符号改变成为了#的时候就代表在检测过程中需要统计改字符串出现在文件中的次数，比如：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">rule example</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$a = <span class="string">&quot;dummy1&quot;</span></span><br><span class="line">		$b = <span class="string">&quot;dummy2&quot;</span></span><br><span class="line">		</span><br><span class="line">	condition:</span><br><span class="line">		<span class="meta">#a == 6 and #b &gt;10</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 以上事例就代表匹配任何文件或者进程中a字符串出现6次，b字符串出现大于十次的。</p>
+<p>偏移量：</p>
+<p>​	有时我们需要知道字符串是否在某个文件或者进程地址空间中的某个虚拟地址中，在这种情况下我们就会用到at关键字。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">rule AtExample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$a = <span class="string">&quot;dummy1&quot;</span></span><br><span class="line">		$b = <span class="string">&quot;dymmy2&quot;</span></span><br><span class="line">		</span><br><span class="line">	condition:</span><br><span class="line">		$a at <span class="number">100</span> and $b at <span class="number">200</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	意思是指当在文件中偏移量100处（或如果应用于正在运行的进程时在虚地址100处）对字符串进行匹配。默认偏移量使用10进制表示，如果使用十六进制的话需要在数字前面加0x前缀。</p>
+<p>如果想在一个偏移量范围内对字符串进行匹配可以使用in关键字。比如：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">rule Inexample</span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$a = <span class="string">&quot;dummy1&quot;</span></span><br><span class="line">		$b = <span class="string">&quot;dummy2&quot;</span></span><br><span class="line">	condition:</span><br><span class="line">		$a in (<span class="number">0.</span><span class="number">.100</span>) and $b in (<span class="number">100.</span>.filesize)  <span class="comment">//这里一定注意是两个点</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里表示$a 的检测范围是偏移量0-100之间，$b的检测范围是100-文件结尾。</p>
+<p>​	当如果一个字符串在文件中出现多次，我们可以通过@a[i]来获取第i次出现的字符串的偏移量是多少，来判断是否符合恶意程序的特征。这里这个数组是从1开始计数的并不是从0开始。@a[1]就是匹配第一次出现的位置</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rule offset </span><br><span class="line">&#123;</span><br><span class="line">	strings:</span><br><span class="line">		$a = <span class="string">&quot;?&quot;</span></span><br><span class="line">	condition：</span><br><span class="line">		@a[<span class="number">1</span>] == <span class="number">5</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	这个规则就是匹配?在文件中第一次出现的位置的偏移量是不是5</p>
+<p>匹配长度：(感觉用处不大，了解即可)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">For many regular expressions and hex strings containing jumps, the length of the match is variable. If you have the regular expression /fo*/ the strings <span class="string">&quot;fo&quot;</span>, <span class="string">&quot;foo&quot;</span> and <span class="string">&quot;fooo&quot;</span> can be matches, all of them with a different length.</span><br><span class="line"></span><br><span class="line">You can use the length of the matches as part of your condition by using the character ! in front of the <span class="built_in">string</span> identifier, in a similar way you use the @ character <span class="keyword">for</span> the offset. !a[<span class="number">1</span>] is the length <span class="keyword">for</span> the first match of $a, !a[<span class="number">2</span>] is the length <span class="keyword">for</span> the second match, and so on. !a is a abbreviated form of !a[<span class="number">1</span>].</span><br></pre></td></tr></table></figure>
+
+<p>Filesize：匹配文件大小：</p>
+<p>​	字符串特征并不是对恶意程序识别的唯一变量，yara还支持其他的变量，其中filesize就是其中一个。比如下面这个规则就是扫描文件的大小，判断是否大于200KB，注意大小使用字节表示的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rule fulesizeexample</span><br><span class="line">&#123;</span><br><span class="line">	condition:</span><br><span class="line">		filesize &gt; <span class="number">200</span>KB</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​	当然该关键字只是针对于文件进行扫描才有意义，对于进程进行扫描将永远匹配不到。</p>
+<p>匹配文件或者进程中虚拟内存的位置：</p>
+<p>​	很多情况下我们希望能够匹配文件制定偏移量或者进程虚拟空间指定偏移量的的数据这取决于我们匹配的是文件还是进程。我们可以选择一下函数对指定偏移量的文件数据进行读取：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">int8(&lt;offset or virtual address&gt;)</span><br><span class="line">int16(&lt;offset or virtual address&gt;)</span><br><span class="line">int32(&lt;offset or virtual address&gt;)</span><br><span class="line"></span><br><span class="line">uint8(&lt;offset or virtual address&gt;)</span><br><span class="line">uint16(&lt;offset or virtual address&gt;)</span><br><span class="line">uint32(&lt;offset or virtual address&gt;)</span><br><span class="line"></span><br><span class="line">int8be(&lt;offset or virtual address&gt;)</span><br><span class="line">int16be(&lt;offset or virtual address&gt;)</span><br><span class="line">int32be(&lt;offset or virtual address&gt;)</span><br><span class="line"></span><br><span class="line">uint8be(&lt;offset or virtual address&gt;)</span><br><span class="line">uint16be(&lt;offset or virtual address&gt;)</span><br><span class="line">uint32be(&lt;offset or virtual address&gt;)</span><br></pre></td></tr></table></figure>
+
+<p>Intxx()代表是从offset起读取8\16\32位有符号整数，uintxx()则读取的是无符号整数。16\32位整数都被认为是小端的，如果想要读取大端整数需要使用带有be的函数。下面是一个区分pe文件的规则：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">rule IsPE</span><br><span class="line">&#123;</span><br><span class="line">    condition:</span><br><span class="line">        <span class="comment">// MZ signature at offset 0 and ...</span></span><br><span class="line">        uint16(<span class="number">0</span>) == <span class="number">0x5A4D</span> and</span><br><span class="line">        <span class="comment">// ... PE signature at offset stored in MZ header at 0x3C</span></span><br><span class="line">        uint32(uint32(<span class="number">0x3C</span>)) == <span class="number">0x00004550</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>字符串集合：</p>
+<p>​	在特定情况下我们希望能够识别程序匹配一个字符串集合中的多个字符串的时候可以使用of关键字：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">rule OfExample1</span><br><span class="line">&#123;</span><br><span class="line">    strings:</span><br><span class="line">        $a = <span class="string">&quot;dummy1&quot;</span></span><br><span class="line">        $b = <span class="string">&quot;dummy2&quot;</span></span><br><span class="line">        $c = <span class="string">&quot;dummy3&quot;</span></span><br><span class="line"></span><br><span class="line">    condition:</span><br><span class="line">        <span class="number">2</span> of ($a,$b,$c)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面事例就代表 文件至少要匹配字符串集合中两个字符串才算命中规则。除了像这样将字符串的变量名加入到集合中之外，还可以使用通配符的方式比如：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">rule OfExample3</span><br><span class="line">&#123;</span><br><span class="line">    strings:</span><br><span class="line">        $foo1 = <span class="string">&quot;foo1&quot;</span></span><br><span class="line">        $foo2 = <span class="string">&quot;foo2&quot;</span></span><br><span class="line"></span><br><span class="line">        $bar1 = <span class="string">&quot;bar1&quot;</span></span><br><span class="line">        $bar2 = <span class="string">&quot;bar2&quot;</span></span><br><span class="line"></span><br><span class="line">    condition:</span><br><span class="line">        <span class="number">3</span> of ($foo*,$bar1,$bar2)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>甚至可以使用$*的方式启用所有的变量等价于关键字them：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">rule OfExample4</span><br><span class="line">&#123;</span><br><span class="line">    strings:</span><br><span class="line">        $a = <span class="string">&quot;dummy1&quot;</span></span><br><span class="line">        $b = <span class="string">&quot;dummy2&quot;</span></span><br><span class="line">        $c = <span class="string">&quot;dummy3&quot;</span></span><br><span class="line"></span><br><span class="line">    condition:</span><br><span class="line">        <span class="number">1</span> of them <span class="comment">// equivalent to 1 of ($*)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>all 和 any也可以用在字符串集合中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">all of them       <span class="comment">// all strings in the rule</span></span><br><span class="line">any of them       <span class="comment">// any string in the rule</span></span><br><span class="line">all <span class="title function_">of</span> <span class="params">($a*)</span>      <span class="comment">// all strings whose identifier starts by $a</span></span><br><span class="line">any <span class="title function_">of</span> <span class="params">($a,$b,$c)</span> <span class="comment">// any of $a, $b or $c</span></span><br><span class="line">1 <span class="title function_">of</span> <span class="params">($*)</span>         <span class="comment">// same that &quot;any of them&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>pm&fc</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="https://retry-later.github.io/2022/04/25/Yara-%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C/">https://retry-later.github.io/2022/04/25/Yara-%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E6%81%B6%E6%84%8F%E8%BD%AF%E4%BB%B6/"># 恶意软件</a>
+                    
+                        <a href="/tags/%E6%89%AB%E6%8F%8F%E5%BC%95%E6%93%8E/"># 扫描引擎</a>
+                    
+                        <a href="/tags/Yara/"># Yara</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/04/25/Java%E5%AD%A6%E4%B9%A0-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1-%E6%9C%AA%E5%AE%8C%E7%BB%93/">Java学习-面向对象(未完结)</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© pm&amp;fc | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
