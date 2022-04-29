@@ -1395,3 +1395,6 @@ header label {
 .post-content pre .javascript .function {
   color: #8959a8;
 }
+.post-body p {
+  text-indent: 2em;
+}

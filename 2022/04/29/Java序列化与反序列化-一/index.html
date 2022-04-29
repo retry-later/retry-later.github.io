@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="pm&fc">
+
+
+    <meta name="subtitle" content="Blog">
+
+
+    <meta name="description" content="写点所学所想">
+
+
+
+<title>Java序列化与反序列化(一) | Retry-later&#39;s Blog</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Retry-later&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Retry-later&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6;    // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function () {
+            tocbot.refresh(obj_merge(tocbot_default_config, { hasInnerContainers: true }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function () {
+        tocbot.init(obj_merge(tocbot_default_config, { collapseDepth: 1 }));
+    });
+
+    function expandToc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, { collapseDepth: expanded ? 1 : DEPTH_MAX }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Java序列化与反序列化(一)</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">pm&fc</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 29, 2022&nbsp;&nbsp;17:03:36</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/Java/">Java</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Java序列化与反序列化"><a href="#Java序列化与反序列化" class="headerlink" title="Java序列化与反序列化"></a>Java序列化与反序列化</h1><h2 id="序列化与反序列化介绍"><a href="#序列化与反序列化介绍" class="headerlink" title="序列化与反序列化介绍"></a>序列化与反序列化介绍</h2><p>Java序列化是将Java对象转换为字节序列的过程，这个状态的Java对象适合保存的文件、内存中或者可被<code>socket</code>进行传输。在Java中使用<code>ObjectOutputStream</code>类的<code>writeObject()</code>方法将对象进行序列化。</p>
+<p>Java反序列化是指把字节序列还原为Java对象的过程，在Java中使用<code>ObjectInputStream</code>类的<code>readObject()</code>方法进行反序列化。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mysec;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.util.logging.Logger;</span><br><span class="line"><span class="keyword">import</span> java.util.logging.Level;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Demo</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> Logger.getGlobal();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="string">&quot;这是一条测试信息&quot;</span>;</span><br><span class="line">        <span class="type">Demo</span> <span class="variable">demo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Demo</span>();</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> demo.WriteObj(obj);</span><br><span class="line">        demo.ReadObj(s);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">WriteObj</span><span class="params">(Object obj)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;out.obj&quot;</span>);</span><br><span class="line">        file.createNewFile();</span><br><span class="line">        <span class="type">FileOutputStream</span> <span class="variable">fileOutputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(file);</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">objOutputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(fileOutputStream);</span><br><span class="line">        objOutputStream.writeObject(obj);</span><br><span class="line">        objOutputStream.close();</span><br><span class="line">        fileOutputStream.close();</span><br><span class="line">        log.info(<span class="string">&quot;对象序列化完毕！&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> file.getName();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">ReadObj</span><span class="params">(String file)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="type">File</span> <span class="variable">file1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(file);</span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">objectInputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(file1));</span><br><span class="line">        <span class="type">Object</span> <span class="variable">inObject</span> <span class="operator">=</span> objectInputStream.readObject();</span><br><span class="line">        <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> (String) inObject;</span><br><span class="line">        System.out.println(s);</span><br><span class="line">        log.info(<span class="string">&quot;对象反序列化完毕成功读取，正在删除文件！&quot;</span>);</span><br><span class="line"><span class="comment">//        file1.delete();</span></span><br><span class="line">        objectInputStream.close();;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"></span><br><span class="line">四月 <span class="number">27</span>, <span class="number">2022</span> <span class="number">4</span>:<span class="number">50</span>:<span class="number">03</span> 下午 com.mysec.Demo WriteObj</span><br><span class="line">信息: 对象序列化完毕！</span><br><span class="line">这是一条测试信息</span><br><span class="line">四月 <span class="number">27</span>, <span class="number">2022</span> <span class="number">4</span>:<span class="number">50</span>:<span class="number">04</span> 下午 com.mysec.Demo ReadObj</span><br><span class="line">信息: 对象反序列化完毕成功读取，正在删除文件！</span><br></pre></td></tr></table></figure>
+
+<p>out.obj内容：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/retry-later/img/2022/image-20220427165154620.png" alt="image-20220427165154620"></p>
+<h2 id="序列化与反序列化条件"><a href="#序列化与反序列化条件" class="headerlink" title="序列化与反序列化条件"></a>序列化与反序列化条件</h2><p> 并不是所有的Java对象都可以进行序列化的，只有实现了<code>java.io.Serializable/Externalizable</code>接口的对象才能够被序列化。<code>Externalizable</code>接口继承自<code>Serializable</code>接口，实现<code>Externalizable</code>接口的类完全由自身来控制序列化的行为，而只是实现了<code>Serializable</code>接口的类只能采用默认的序列化方法。</p>
+<h3 id="实现Serializable接口"><a href="#实现Serializable接口" class="headerlink" title="实现Serializable接口"></a>实现Serializable接口</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//demo2</span></span><br><span class="line"><span class="keyword">package</span> com.mysec;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.util.logging.Logger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Demo2</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> Logger.getGlobal();</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line">        person.setAge(<span class="number">19</span>);</span><br><span class="line">        person.setName(<span class="string">&quot;小明&quot;</span>);</span><br><span class="line">        person.setSex(<span class="string">&quot;男&quot;</span>);</span><br><span class="line">        person.setID(<span class="string">&quot;1111111&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] bytes = SerializeObj(person);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> DeserializeObj(bytes);</span><br><span class="line">        <span class="type">Person</span> <span class="variable">p</span> <span class="operator">=</span> (Person) o;</span><br><span class="line">        System.out.println(<span class="string">&quot;大家好，我的名字叫：&quot;</span>+p.getName() +<span class="string">&quot;，今年&quot;</span>+p.getAge()+<span class="string">&quot;岁了,&quot;</span>+<span class="string">&quot;我是&quot;</span>+p.getSex()+<span class="string">&quot;生。ID:&quot;</span>+p.getID());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">byte</span>[] SerializeObj(Object obj) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">out</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">objectOutputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(out);</span><br><span class="line">        objectOutputStream.writeObject(obj);</span><br><span class="line">        log.info(<span class="string">&quot;对象序列化完成&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] bytes = out.toByteArray();</span><br><span class="line">        out.close();</span><br><span class="line">        objectOutputStream.close();</span><br><span class="line">        <span class="keyword">return</span> bytes;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Object <span class="title function_">DeserializeObj</span><span class="params">(<span class="type">byte</span>[] bytes)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="type">ByteArrayInputStream</span> <span class="variable">input</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(bytes);</span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">objInput</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(input);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> objInput.readObject();</span><br><span class="line">        objInput.close();</span><br><span class="line">        input.close();</span><br><span class="line">        log.info(<span class="string">&quot;对象反序列化完成！&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">serialVersionUID</span> <span class="operator">=</span> <span class="number">9918822010102L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> age;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String sex;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">transient</span> String ID;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getID</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ID;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setID</span><span class="params">(String ID)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.ID = ID;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getAge</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setAge</span><span class="params">(<span class="type">int</span> age)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getSex</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> sex;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setSex</span><span class="params">(String sex)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.sex = sex;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//输出</span></span><br><span class="line">四月 <span class="number">27</span>, <span class="number">2022</span> <span class="number">5</span>:<span class="number">22</span>:<span class="number">20</span> 下午 com.mysec.Demo2 SerializeObj</span><br><span class="line">信息: 对象序列化完成</span><br><span class="line">四月 <span class="number">27</span>, <span class="number">2022</span> <span class="number">5</span>:<span class="number">22</span>:<span class="number">20</span> 下午 com.mysec.Demo2 DeserializeObj</span><br><span class="line">信息: 对象反序列化完成！</span><br><span class="line">大家好，我的名字叫：小明，今年<span class="number">19</span>岁了,我是男生。</span><br></pre></td></tr></table></figure>
+
+<h3 id="实现Externalizable接口"><a href="#实现Externalizable接口" class="headerlink" title="实现Externalizable接口"></a>实现Externalizable接口</h3><p><code>Exterizable</code>接口是<code>Serializable</code>的子类，<code>Exterizable</code>实现了两个方法用来自定义序列化与反序列化；同时继承<code>Exterzable</code>接口的类必须声明一个无法构造器，因为反序列化时需要反射创建对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Demo2</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> Logger.getGlobal();</span><br><span class="line">  	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException 		&#123;</span><br><span class="line">      <span class="type">Animal</span> <span class="variable">a</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Animal</span>();</span><br><span class="line">        a.setSpecies(<span class="string">&quot;猫&quot;</span>);</span><br><span class="line">        a.setName(<span class="string">&quot;小咪&quot;</span>);</span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">byteArrOnStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">objOutStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(byteArrOnStream);</span><br><span class="line">        objOutStream.writeObject(a);</span><br><span class="line">        <span class="type">byte</span>[] bytes1 = byteArrOnStream.toByteArray();</span><br><span class="line">        objOutStream.close();</span><br><span class="line">        byteArrOnStream.close();</span><br><span class="line">        <span class="type">ByteArrayInputStream</span> <span class="variable">byteArrInStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(bytes1);</span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">objInStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(byteArrInStream);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">o1</span> <span class="operator">=</span> objInStream.readObject();</span><br><span class="line">        objInStream.close();</span><br><span class="line">        byteArrInStream.close();</span><br><span class="line">        <span class="type">Animal</span> <span class="variable">animal</span> <span class="operator">=</span> (Animal) o1;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Animal</span> <span class="keyword">implements</span> <span class="title class_">Externalizable</span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Animal</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="built_in">super</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String Species;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getSpecies</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Species;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setSpecies</span><span class="params">(String region)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.Species = region;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">writeExternal</span><span class="params">(ObjectOutput out)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        System.out.println(<span class="built_in">this</span>.getSpecies());</span><br><span class="line">        System.out.println(<span class="built_in">this</span>.getName());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">readExternal</span><span class="params">(ObjectInput in)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//输出</span></span><br><span class="line">猫</span><br><span class="line">小咪</span><br></pre></td></tr></table></figure>
+
+<h2 id="serialVersionUID"><a href="#serialVersionUID" class="headerlink" title="serialVersionUID"></a>serialVersionUID</h2><p>序列化运行时与每个可序列化的类关联一个版本号，称为<code>serialVersionUID</code>。在反序列化过程中使用该版本号来验证序列化对象的发送者和接收者是否已加载了该对象的与序列化兼容的类。如果接收者已为该对象加载了一个与相应发送者类具有不同的<code>serialVersionUID</code>的类，则反序列化将导致<code>InvalidClassException</code>错误。可序列化的类可以使用一个<code>static</code>、<code>final</code>的字段来显式声明自己的serialVersionUID。<br>如果可序列化的类未明确声明<code>serialVersionUID</code>，则序列化运行时将根据该类的各个方面为该类计算默认的<code>serialVersionUID</code>值。但是，强烈建议所有可序列化的类显式声明<code>serialVersionUID</code>值，因为默认的<code>serialVersionUID</code>计算对类详细信息高度敏感，而类详细信息可能会根据编译器的实现而有所不同，因此在反序列化过程中可能导致<code>InvalidClassException</code>。此外还建议声明<code>serialVersionUID</code>时使用private修饰符，因为<code>serialVersionUID</code>字段作为继承成员不起作用。</p>
+<h2 id="ObjectOutputStream"><a href="#ObjectOutputStream" class="headerlink" title="ObjectOutputStream"></a>ObjectOutputStream</h2><h3 id="ObjectStreamConstants接口"><a href="#ObjectStreamConstants接口" class="headerlink" title="ObjectStreamConstants接口"></a>ObjectStreamConstants接口</h3><p> 定义了一些在对象序列化时写入的常量：能将Java中的类、数组、基本数据类型等对象转换为可输出的字节，也就是反序列化。<code>ObjectOutputStream</code>也继承了这个接口。</p>
+<p><code>ObjectOutputStream</code>类中有几个在序列化与反序列化的关键方法：</p>
+<h3 id="writeObject"><a href="#writeObject" class="headerlink" title="writeObject"></a>writeObject</h3><pre><code> `ObjectOutputStream`对象的核心方法之一，用于将一个对象写入输出流，任何对象都是通过这个方法写入到流中的。
+</code></pre>
+<h3 id="writeUbshared"><a href="#writeUbshared" class="headerlink" title="writeUbshared"></a>writeUbshared</h3><p>用于将非共享对象写入<code>ObjectOutputStream</code>，并将给定的对象作为刷新对象写入流中。使用<code>writeUnshared</code>方法会使用<code>BlockDataOutputStream</code>的新实例进行序列化操作，不会使用原来的<code>OutputStream</code>的引用对象。</p>
+<h3 id="writeObject-1"><a href="#writeObject-1" class="headerlink" title="writeObject"></a>writeObject</h3><p> <code>writeObject</code>和<code>writeUnshared</code>实际调用<code>writeObject0</code>方法，也就是说<code>writeObject0</code>是两个方法的基础实现。</p>
+<h3 id="writeObjectOverride"><a href="#writeObjectOverride" class="headerlink" title="writeObjectOverride"></a>writeObjectOverride</h3><p>如果<code>ObjectOutputStream</code>中的<code>enable Override</code>属性为<code>true</code>，<code>writeObject</code>方法将会调用<code>writeObjectOverride</code>，这个方法是由<code>ObjectOutputStream</code>的子类实现；在由完全重新实现<code>ObjectOutput Stream</code>的子类完成序列化功能时，将会调用实现类的<code>writeObjectOverride</code>方法进行处理。</p>
+<h2 id="ObjectInputStream"><a href="#ObjectInputStream" class="headerlink" title="ObjectInputStream"></a>ObjectInputStream</h2><p><code>ObjectInputStream</code>也继承了<code>ObjectStreamConstants</code>接口，以下为<code>ObjectInputStream</code>的关键方法：</p>
+<h3 id="readObject"><a href="#readObject" class="headerlink" title="readObject"></a>readObject</h3><p>在<code>ObjectInputStream</code>中读取一个对象，将会读取对象的类、类的签名、类的非<code>transient</code>和非<code>static</code>字段的值，及其所有父类类型。</p>
+<h3 id="readUnshared"><a href="#readUnshared" class="headerlink" title="readUnshared"></a>readUnshared</h3><p> 从<code>ObjectInputStream</code>中读取一个非共享对象，此方法和<code>readObject</code>类似。但是<code>readUnshared</code>不允许后续的<code>readObject</code>和<code>readUnshared</code>调用这次反序列化得到的对象。</p>
+<h3 id="readObject0"><a href="#readObject0" class="headerlink" title="readObject0"></a>readObject0</h3><p>  <code>readObject</code>和<code>readUnshared</code>实际上调用<code>readObject0</code>方法，<code>readObject0</code>是这两个方法的基础实现。</p>
+<h3 id="readObjectOverride"><a href="#readObjectOverride" class="headerlink" title="readObjectOverride"></a>readObjectOverride</h3><p>  由<code>ObjectInputStream</code>的子类调用，和<code>writeObjectOverride</code>一致。</p>
+<h2 id="transient"><a href="#transient" class="headerlink" title="transient"></a>transient</h2><p> 被transient修饰的字段在序列化时会跳过该字段。Demo2新增</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Person类增加</span></span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">transient</span> String ID;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getID</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ID;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setID</span><span class="params">(String ID)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.ID = ID;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Demo2.mian方法修改为</span></span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line">        person.setAge(<span class="number">19</span>);</span><br><span class="line">        person.setName(<span class="string">&quot;小明&quot;</span>);</span><br><span class="line">        person.setSex(<span class="string">&quot;男&quot;</span>);</span><br><span class="line">        person.setID(<span class="string">&quot;1111111&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] bytes = SerializeObj(person);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> DeserializeObj(bytes);</span><br><span class="line">        <span class="type">Person</span> <span class="variable">p</span> <span class="operator">=</span> (Person) o;</span><br><span class="line">        System.out.println(<span class="string">&quot;大家好，我的名字叫：&quot;</span>+p.getName() +<span class="string">&quot;，今年&quot;</span>+p.getAge()+<span class="string">&quot;岁了,&quot;</span>+<span class="string">&quot;我是&quot;</span>+p.getSex()+<span class="string">&quot;生。ID:&quot;</span>+p.getID());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/retry-later/img/2022/image-20220427174543817.png" alt="image-20220427174543817"></p>
+<h2 id="自定义序列化与反序列化（writeObject和readObject）"><a href="#自定义序列化与反序列化（writeObject和readObject）" class="headerlink" title="自定义序列化与反序列化（writeObject和readObject）"></a>自定义序列化与反序列化（writeObject和readObject）</h2><p>如果被序列化的类重写了<code>writeObject</code>和<code>readObject</code>方法，Java将会委托使用这两个方法来进行序列化与反序列化。在反序列化一个类的时候，如果该类重写了<code>readObject</code>方法，且方法中含有恶意的调用，则会造成危害。Demo如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.mysec;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DemoExec</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="type">Run</span> <span class="variable">run</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Run</span>();</span><br><span class="line">        run.setName(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">        <span class="comment">// 对对象进行序列化</span></span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">byteArrOutStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">objOut</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(byteArrOutStream);</span><br><span class="line">        objOut.writeObject(run);</span><br><span class="line">        objOut.close();</span><br><span class="line">        <span class="type">byte</span>[] bytes = byteArrOutStream.toByteArray();</span><br><span class="line">        byteArrOutStream.close();</span><br><span class="line">        <span class="comment">//对数据进行反序列化</span></span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">objIn</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(bytes));</span><br><span class="line">        <span class="type">Object</span> <span class="variable">o</span> <span class="operator">=</span> objIn.readObject();</span><br><span class="line">        objIn.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Run</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">readObject</span><span class="params">(java.io.ObjectInputStream in)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        Runtime.getRuntime().exec(<span class="string">&quot;open /System/Applications/Calculator.app&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/retry-later/img/2022/image-20220429112719590.png" alt="image-20220429112719590"></p>
+<h3 id="执行原理"><a href="#执行原理" class="headerlink" title="执行原理"></a>执行原理</h3><p>追进代码，看一下为什么<code>ObjectInputStream</code>会执行序列化对象的<code>readObject</code>方法。执行<code>readObject</code>方法先调用了<code>ObjectInputStream</code>对象的<code>readObject</code> -&gt; <code>readObject</code>重载方法 -&gt; <code>readObject0</code> 。 </p>
+<p><img src="https://cdn.jsdelivr.net/gh/retry-later/img/2022/image-20220429151333952.png" alt="image-20220429151333952"></p>
+<p>开始逐个字节读入序列化数据，当识别到<code>0x73</code><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/platform/serialization/spec/protocol.html">对象标识符时</a>，判断是否为字符串对象，如果不是开始执行<code>readOrdinaryObject</code>方法，跟进<code>readOrdinaryObject</code> ，<code>readClassDesc()</code>读取类描述 -&gt; 判断类是否实现了<code>readObject</code>方法 -&gt; 如果类重写了<code>readObject</code>方法，则调用执行类的方法；如果没有则执行默认的<code>readObject</code>方法。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/retry-later/img/2022/image-20220429160152423.png" alt="image-20220429160152423"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/retry-later/img/2022/image-20220429163705617.png" alt="image-20220429163705617"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/retry-later/img/2022/image-20220429165544007.png" alt="image-20220429165544007"></p>
+<p>同理，序列化的对象重写了<code>writeObject</code>方法也会产生恶意的调用。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/gdI3ngc9QpAryO_FCLc2Nw">https://mp.weixin.qq.com/s/gdI3ngc9QpAryO_FCLc2Nw</a></li>
+<li><a target="_blank" rel="noopener" href="https://su18.org/post/ysoserial-su18-1/">https://su18.org/post/ysoserial-su18-1/</a></li>
+<li><a target="_blank" rel="noopener" href="https://c014.cn/blog/java/Java%20%E5%8D%87%E7%BA%A7%E4%B9%8B%E8%B7%AF%EF%BC%88%E4%B8%80%EF%BC%89Java%20%E5%BA%8F%E5%88%97%E5%8C%96%E4%B8%8E%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96.html">https://c014.cn/blog/java/Java%20%E5%8D%87%E7%BA%A7%E4%B9%8B%E8%B7%AF%EF%BC%88%E4%B8%80%EF%BC%89Java%20%E5%BA%8F%E5%88%97%E5%8C%96%E4%B8%8E%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96.html</a></li>
+</ul>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>pm&fc</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="https://retry-later.github.io/2022/04/29/Java%E5%BA%8F%E5%88%97%E5%8C%96%E4%B8%8E%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-%E4%B8%80/">https://retry-later.github.io/2022/04/29/Java%E5%BA%8F%E5%88%97%E5%8C%96%E4%B8%8E%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-%E4%B8%80/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>Do you believe in <strong>DESTINY</strong>?</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/Java/"># Java</a>
+                    
+                        <a href="/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/"># 反序列化漏洞</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2022/04/25/Yara-%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C/">Yara 用户手册</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© pm&amp;fc | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
